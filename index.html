@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados Encuesta de Satisfacción 2025-II | C.I. Colombian Mint</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-gold: #FFD700;
+            --secondary-gold: #C5A000;
+            --dark-bg: #121212;
+            --card-bg: #1e1e1e;
+            --text-gray: #e0e0e0;
+            --accent-green: #28a745;
+            --accent-red: #dc3545;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        body {
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text-gray);
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            width: 95vw;
+            height: 90vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide {
+            display: none;
+            flex-direction: column;
+            background: linear-gradient(145deg, rgba(30, 30, 30, 0.95) 0%, rgba(18, 18, 18, 0.98) 100%);
+            border: 2px solid var(--primary-gold);
+            border-radius: 20px;
+            padding: 80px 40px 60px 40px;
+            /* Top padding for logos, Bottom for footer */
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        /* Persistent Header Elements */
+        .header-logo-left {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            height: 60px;
+            width: auto;
+            filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.3));
+            z-index: 10;
+        }
+
+        .header-logo-right {
+            position: absolute;
+            top: 25px;
+            right: 30px;
+            height: 45px;
+            width: auto;
+            filter: brightness(1.2);
+            z-index: 10;
+        }
+
+        /* Persistent Footer Elements inside Slide */
+        .slide-footer-text {
+            position: absolute;
+            bottom: 15px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+            pointer-events: none;
+        }
+
+        .title-container {
+            text-align: center;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .title {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 3.5rem;
+            color: var(--primary-gold);
+            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
+            letter-spacing: 2px;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #ccc;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            flex-grow: 1;
+            height: 100%;
+            align-content: center;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border-left: 4px solid var(--primary-gold);
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .big-number {
+            font-size: 5rem;
+            font-weight: 700;
+            color: var(--primary-gold);
+            margin: 10px 0;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .chart-container-wrapper {
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+        }
+
+        canvas {
+            max-height: 100%;
+            max-width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            font-size: 1.1rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px;
+            color: var(--primary-gold);
+            border-bottom: 2px solid var(--primary-gold);
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+        }
+
+        td {
+            background: rgba(40, 40, 40, 0.6);
+            padding: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        tr td:first-child {
+            border-radius: 10px 0 0 10px;
+            border-left: 3px solid transparent;
+        }
+
+        tr td:last-child {
+            border-radius: 0 10px 10px 0;
+        }
+
+        tr:hover td:first-child {
+            border-left-color: var(--primary-gold);
+        }
+
+        .nav-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 40px;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-nav {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--primary-gold);
+            color: var(--primary-gold);
+            padding: 8px 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 10px;
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+        }
+
+        .btn-nav:hover:not(:disabled) {
+            background: var(--primary-gold);
+            color: #000;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-nav:disabled {
+            border-color: #555;
+            color: #555;
+            cursor: not-allowed;
+            background: transparent;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .bg-green {
+            background: rgba(40, 167, 69, 0.2);
+            color: #4cd137;
+            border: 1px solid #4cd137;
+        }
+
+        .bg-yellow {
+            background: rgba(255, 193, 7, 0.2);
+            color: #fbc531;
+            border: 1px solid #fbc531;
+        }
+
+        .section-score {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+
+        .score-green {
+            color: #4cd137;
+        }
+
+        .score-yellow {
+            color: #fbc531;
+        }
+
+        .action-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 3px solid var(--primary-gold);
+        }
+
+        .action-number {
+            background: var(--primary-gold);
+            color: #000;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="presentation-container">
+
+        <!-- Slide 1: Portada -->
+        <div class="slide active">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEigu_vafcG5saLG0r13cHA0Y9geRGVEjPESWbHTVt9fegBAIB6QsTVDelYSmoTSb69y912nYTf3ckJC6FeS1OcEyvDA_u3rJUlc3T02BzfssvNRrrLOESObIVaeI0SE3yW7GM4J2VqmB9zrDf6xsc3UyIESHks1sJ8OkxxgBxHinI48TTYsTLHSffvDWA/w100-h90/Logo-versi%C3%B3n-final-2022.png"
+                class="header-logo-left" alt="CI Mint Logo">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhgzHJKDt6pmv91oY1l3emW3b-A8Gemlig1N2JG-OD_MVvelGlN6wsMEfVRmclY-tTtV6fhs7ib2h6AzLD7iRDiTWDCyS-4p0RAvrx3isFAD6jOl7UqAnRfkc-MYje1tnRuN89_46SelyRMj5G4adF3hKNoRY2a4NrsegRIsWt9qSgXWSBtQFr3wYB32YCa/w100-h46/logo%20capte.png"
+                class="header-logo-right" alt="CAPTE Logo">
+
+            <div
+                style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <h1 class="title" style="font-size: 6rem;">ENCUESTA DE SATISFACCIÓN</h1>
+                <h2 class="subtitle" style="color: var(--primary-gold); font-size: 2.5rem; margin-top: 20px;">RESULTADOS
+                    CONSOLIDADOS | 2025 - II SEMESTRE</h2>
+
+                <div
+                    style="margin-top: 60px; background: rgba(255,215,0,0.1); padding: 40px; border-radius: 20px; border: 1px solid var(--primary-gold); min-width: 500px;">
+                    <p style="font-size: 1.5rem; margin-bottom: 10px;">
+                        <strong style="color: var(--primary-gold);">Participación Histórica</strong>
+                    </p>
+                    <div style="font-size: 6rem; font-weight: 700; color: #fff; line-height: 1;">100.00%</div>
+                    <p style="margin-top: 15px; color: #aaa; font-size: 1.2rem;">60 respuestas de 60 clientes objetivos
+                    </p>
+                </div>
+            </div>
+
+            <div class="slide-footer-text">
+                C.I. Colombian Mint S.A.S. | Encuesta de Satisfacción 2025 - II Semestre
+            </div>
+        </div>
+
+        <!-- Slide 2: Resultados Generales -->
+        <div class="slide">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEigu_vafcG5saLG0r13cHA0Y9geRGVEjPESWbHTVt9fegBAIB6QsTVDelYSmoTSb69y912nYTf3ckJC6FeS1OcEyvDA_u3rJUlc3T02BzfssvNRrrLOESObIVaeI0SE3yW7GM4J2VqmB9zrDf6xsc3UyIESHks1sJ8OkxxgBxHinI48TTYsTLHSffvDWA/w100-h90/Logo-versi%C3%B3n-final-2022.png"
+                class="header-logo-left" alt="CI Mint Logo">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhgzHJKDt6pmv91oY1l3emW3b-A8Gemlig1N2JG-OD_MVvelGlN6wsMEfVRmclY-tTtV6fhs7ib2h6AzLD7iRDiTWDCyS-4p0RAvrx3isFAD6jOl7UqAnRfkc-MYje1tnRuN89_46SelyRMj5G4adF3hKNoRY2a4NrsegRIsWt9qSgXWSBtQFr3wYB32YCa/w100-h46/logo%20capte.png"
+                class="header-logo-right" alt="CAPTE Logo">
+
+            <div class="title-container">
+                <h2 class="title">PANORAMA GENERAL</h2>
+            </div>
+
+            <div class="content-grid">
+                <div class="metric-card">
+                    <h3>CALIFICACIÓN GLOBAL</h3>
+                    <div class="big-number">4.6</div>
+                    <p style="font-size: 1.2rem;">Nivel de Excelencia Sostenido</p>
+                    <div style="margin-top: 30px; text-align: left; padding: 0 40px;">
+                        <small style="font-size: 1rem;">Promotores Activos:</small>
+                        <div
+                            style="background: #333; height: 15px; border-radius: 8px; margin: 10px 0; overflow: hidden;">
+                            <div style="width: 85%; background: var(--accent-green); height: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>DIMENSIONES CLAVE</h3>
+                    <div class="chart-container-wrapper">
+                        <canvas id="spiderChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>CONCEPTO DEL CLIENTE</h3>
+                    <div
+                        style="display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; align-content: center; height: 100%;">
+                        <span class="status-badge"
+                            style="border: 2px solid var(--primary-gold); color: var(--primary-gold); font-size: 1.5rem; padding: 10px 20px;">Amabilidad</span>
+                        <span class="status-badge"
+                            style="border: 1px solid #fff; font-size: 1.2rem; padding: 8px 15px;">Confianza</span>
+                        <span class="status-badge" style="border: 1px solid #aaa; font-size: 1.1rem;">Efectividad</span>
+                        <span class="status-badge"
+                            style="border: 1px solid var(--primary-gold); font-size: 1.3rem;">Pagos Puntuales</span>
+                        <span class="status-badge"
+                            style="border: 1px solid var(--accent-green); font-size: 1.2rem;">Solidez</span>
+                        <span class="status-badge"
+                            style="border: 1px solid var(--accent-red); font-size: 1.1rem;">WhatsApp</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide-footer-text">
+                C.I. Colombian Mint S.A.S. | Encuesta de Satisfacción 2025 - II Semestre
+            </div>
+        </div>
+
+        <!-- Slide 3: Detalles por Segmento -->
+        <div class="slide">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEigu_vafcG5saLG0r13cHA0Y9geRGVEjPESWbHTVt9fegBAIB6QsTVDelYSmoTSb69y912nYTf3ckJC6FeS1OcEyvDA_u3rJUlc3T02BzfssvNRrrLOESObIVaeI0SE3yW7GM4J2VqmB9zrDf6xsc3UyIESHks1sJ8OkxxgBxHinI48TTYsTLHSffvDWA/w100-h90/Logo-versi%C3%B3n-final-2022.png"
+                class="header-logo-left" alt="CI Mint Logo">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhgzHJKDt6pmv91oY1l3emW3b-A8Gemlig1N2JG-OD_MVvelGlN6wsMEfVRmclY-tTtV6fhs7ib2h6AzLD7iRDiTWDCyS-4p0RAvrx3isFAD6jOl7UqAnRfkc-MYje1tnRuN89_46SelyRMj5G4adF3hKNoRY2a4NrsegRIsWt9qSgXWSBtQFr3wYB32YCa/w100-h46/logo%20capte.png"
+                class="header-logo-right" alt="CAPTE Logo">
+
+            <div class="title-container">
+                <h2 class="title" style="font-size: 3rem;">ANÁLISIS POR PROCESO</h2>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 40% 60%; gap: 50px; flex-grow: 1; min-height: 0;">
+                <div class="chart-container-wrapper">
+                    <canvas id="detailsChart"></canvas>
+                </div>
+                <div style="display: flex; flex-direction: column; justify-content: center; overflow-y: auto;">
+                    <div class="action-item" style="border-left-color: var(--accent-green);">
+                        <div class="action-number" style="background: var(--accent-green); color: #fff;">1</div>
+                        <div style="flex-grow: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong style="font-size: 1.2rem;">Atención y Servicio</strong>
+                                <span class="score-green section-score">4.8 ★</span>
+                            </div>
+                            <p style="margin: 5px 0; color: #bbb;">Fortaleza indiscutible. La amabilidad y confianza del
+                                equipo siguen siendo nuestro mayor diferenciador.</p>
+                        </div>
+                    </div>
+
+                    <div class="action-item" style="border-left-color: var(--primary-gold);">
+                        <div class="action-number" style="background: var(--primary-gold); color: #000;">2</div>
+                        <div style="flex-grow: 1;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <strong style="font-size: 1.2rem;">Gestión de Pagos</strong>
+                                <span class="score-green section-score">4.6 ★</span>
+                            </div>
+                            <p style="margin: 5px 0; color: #bbb;">Alta satisfacción. Se valora la oportunidad en la
+                                información de precios y cumplimiento de plazos.</p>
+                        </div>
+                    </div>
+
+                    <div class="action-item" style="border-left-color: var(--secondary-gold);">
+                        <div class="action-number" style="background: var(--secondary-gold); color: #000;">3</div>
+                        <div style="flex-grow: 1;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <strong style="font-size: 1.2rem;">Negociación</strong>
+                                <span class="score-yellow section-score">4.5 ★</span>
+                            </div>
+                            <p style="margin: 5px 0; color: #bbb;">Percepción de justicia y transparencia en las
+                                condiciones comerciales se mantiene estable.</p>
+                        </div>
+                    </div>
+
+                    <div class="action-item" style="border-left-color: #fbc531;">
+                        <div class="action-number" style="background: #fbc531; color: #000;">4</div>
+                        <div style="flex-grow: 1;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <strong style="font-size: 1.2rem;">Laboratorio</strong>
+                                <span class="score-yellow section-score">4.5 ★</span>
+                            </div>
+                            <p style="margin: 5px 0; color: #bbb;">Mejora levemente respecto al histórico, pero sigue
+                                siendo un punto de atención en cuanto a contenido de reportes.</p>
+                        </div>
+                    </div>
+
+                    <div class="action-item" style="border-left-color: var(--accent-red);">
+                        <div class="action-number" style="background: var(--accent-red); color: #fff;">5</div>
+                        <div style="flex-grow: 1;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <strong style="font-size: 1.2rem;">Seguridad y Comunicación</strong>
+                                <span class="score-yellow section-score">4.3 ★</span>
+                            </div>
+                            <p style="margin: 5px 0; color: #bbb;">Disminución notable. Protocolos percibidos como
+                                rigurosos y preferencia por email sobre WhatsApp.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide-footer-text">
+                C.I. Colombian Mint S.A.S. | Encuesta de Satisfacción 2025 - II Semestre
+            </div>
+        </div>
+
+        <!-- Slide 4: Voz del Cliente -->
+        <div class="slide">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEigu_vafcG5saLG0r13cHA0Y9geRGVEjPESWbHTVt9fegBAIB6QsTVDelYSmoTSb69y912nYTf3ckJC6FeS1OcEyvDA_u3rJUlc3T02BzfssvNRrrLOESObIVaeI0SE3yW7GM4J2VqmB9zrDf6xsc3UyIESHks1sJ8OkxxgBxHinI48TTYsTLHSffvDWA/w100-h90/Logo-versi%C3%B3n-final-2022.png"
+                class="header-logo-left" alt="CI Mint Logo">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhgzHJKDt6pmv91oY1l3emW3b-A8Gemlig1N2JG-OD_MVvelGlN6wsMEfVRmclY-tTtV6fhs7ib2h6AzLD7iRDiTWDCyS-4p0RAvrx3isFAD6jOl7UqAnRfkc-MYje1tnRuN89_46SelyRMj5G4adF3hKNoRY2a4NrsegRIsWt9qSgXWSBtQFr3wYB32YCa/w100-h46/logo%20capte.png"
+                class="header-logo-right" alt="CAPTE Logo">
+
+            <div class="title-container">
+                <h2 class="title">LA VOZ DEL CLIENTE</h2>
+                <p>Feedback directo y sin filtros</p>
+            </div>
+
+            <div style="flex-grow: 1; overflow-y: auto; padding-right: 20px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="25%">Aliado Comercial</th>
+                            <th width="15%">Tipo</th>
+                            <th>Testimonio Destacado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>MC METALES DEL CARIBE</strong></td>
+                            <td><span class="status-badge bg-green">Promotor</span></td>
+                            <td>"Mantener los estándares de calidad y servicio al cliente, es agradable visitarlos y ser
+                                atendidos con una sonrisa."</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SOCIEDAD MINERA LOS AMIGOS</strong></td>
+                            <td><span class="status-badge bg-yellow">Constructivo</span></td>
+                            <td>"No envíen documentos por WhatsApp, eso satura. Ojalá siempre todo por correo para
+                                conservar la trazabilidad. Por lo demás, super bien los procesos administrativos."</td>
+                        </tr>
+                        <tr>
+                            <td><strong>COOP. AGRO MINERA IQUIRA</strong></td>
+                            <td><span class="status-badge bg-yellow">Requerimiento</span></td>
+                            <td>"Realizar el pago oportuno de regalías y envío de soportes documentos acordados."</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ESPLENDOR CH SAS</strong></td>
+                            <td><span class="status-badge bg-green">Promotor</span></td>
+                            <td>"Hasta el momento la comunicación ha sido fluida y pertinente."</td>
+                        </tr>
+                        <tr>
+                            <td><strong>MONA MINAS</strong></td>
+                            <td><span class="status-badge bg-green">Promotor</span></td>
+                            <td>"Toda la atención es de manera asertiva."</td>
+                        </tr>
+                        <tr>
+                            <td><strong>MASSEQ SAS</strong></td>
+                            <td><span class="status-badge bg-green">Promotor</span></td>
+                            <td>"Ninguna adicional. (Satisfacción Alta)"</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="slide-footer-text">
+                C.I. Colombian Mint S.A.S. | Encuesta de Satisfacción 2025 - II Semestre
+            </div>
+        </div>
+
+        <!-- Slide 5: Evolución Histórica -->
+        <div class="slide">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEigu_vafcG5saLG0r13cHA0Y9geRGVEjPESWbHTVt9fegBAIB6QsTVDelYSmoTSb69y912nYTf3ckJC6FeS1OcEyvDA_u3rJUlc3T02BzfssvNRrrLOESObIVaeI0SE3yW7GM4J2VqmB9zrDf6xsc3UyIESHks1sJ8OkxxgBxHinI48TTYsTLHSffvDWA/w100-h90/Logo-versi%C3%B3n-final-2022.png"
+                class="header-logo-left" alt="CI Mint Logo">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhgzHJKDt6pmv91oY1l3emW3b-A8Gemlig1N2JG-OD_MVvelGlN6wsMEfVRmclY-tTtV6fhs7ib2h6AzLD7iRDiTWDCyS-4p0RAvrx3isFAD6jOl7UqAnRfkc-MYje1tnRuN89_46SelyRMj5G4adF3hKNoRY2a4NrsegRIsWt9qSgXWSBtQFr3wYB32YCa/w100-h46/logo%20capte.png"
+                class="header-logo-right" alt="CAPTE Logo">
+
+            <div class="title-container">
+                <h2 class="title">EVOLUCIÓN HISTÓRICA</h2>
+            </div>
+
+            <div
+                style="position: relative; background: rgba(255,255,255,0.02); padding: 30px; border-radius: 20px; flex-grow: 1; display: flex; align-items: center; justify-content: center; max-height: 50vh;">
+                <div class="chart-container-wrapper" style="width: 100%; height: 100%; padding-bottom: 90px;">
+                    <canvas id="historicalChart"></canvas>
+                </div>
+
+                <div
+                    style="position: absolute; bottom: -70px; left: 0; width: 100%; display: flex; justify-content: space-evenly; gap: 20px; padding: 0 40px; box-sizing: border-box; z-index: 10;">
+                    <div class="metric-card"
+                        style="padding: 10px; background: rgba(30,30,30,0.85); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px); min-width: 200px;">
+                        <h3 style="margin: 5px 0; color: #aaa;">2024-I</h3>
+                        <div style="color: #aaa; font-size: 2.5rem;">4.6</div>
+                    </div>
+                    <div class="metric-card"
+                        style="padding: 10px; background: rgba(30,30,30,0.85); border: 1px solid #fff; backdrop-filter: blur(5px); min-width: 200px;">
+                        <h3 style="margin: 5px 0; color: #fff;">2025-I</h3>
+                        <div style="color: #fff; font-size: 2.5rem; font-weight: bold;">4.7</div>
+                    </div>
+                    <div class="metric-card"
+                        style="padding: 10px; border-color: var(--accent-green); background: rgba(40,167,69,0.2); backdrop-filter: blur(5px); min-width: 250px;">
+                        <h3 style="margin: 5px 0; color: var(--accent-green);">2025-II</h3>
+                        <div style="color: var(--primary-gold); font-size: 3rem; font-weight: bold;">4.6</div>
+                        <small style="color: var(--accent-green); font-size: 1.1rem;">Consolidación</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide-footer-text">
+                C.I. Colombian Mint S.A.S. | Encuesta de Satisfacción 2025 - II Semestre
+            </div>
+        </div>
+
+        <!-- Slide 6: Plan de Acción -->
+        <div class="slide">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEigu_vafcG5saLG0r13cHA0Y9geRGVEjPESWbHTVt9fegBAIB6QsTVDelYSmoTSb69y912nYTf3ckJC6FeS1OcEyvDA_u3rJUlc3T02BzfssvNRrrLOESObIVaeI0SE3yW7GM4J2VqmB9zrDf6xsc3UyIESHks1sJ8OkxxgBxHinI48TTYsTLHSffvDWA/w100-h90/Logo-versi%C3%B3n-final-2022.png"
+                class="header-logo-left" alt="CI Mint Logo">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhgzHJKDt6pmv91oY1l3emW3b-A8Gemlig1N2JG-OD_MVvelGlN6wsMEfVRmclY-tTtV6fhs7ib2h6AzLD7iRDiTWDCyS-4p0RAvrx3isFAD6jOl7UqAnRfkc-MYje1tnRuN89_46SelyRMj5G4adF3hKNoRY2a4NrsegRIsWt9qSgXWSBtQFr3wYB32YCa/w100-h46/logo%20capte.png"
+                class="header-logo-right" alt="CAPTE Logo">
+
+            <div class="title-container">
+                <h2 class="title">ESTRATEGIA 2026-I</h2>
+                <p>Acciones enfocadas en la Excelencia</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; flex-grow: 1; align-content: center;">
+                <div class="action-item">
+                    <div class="action-number">1</div>
+                    <div>
+                        <strong style="font-size: 1.3rem; margin-bottom: 5px; display: block;">Optimización de Canales
+                            (Trazabilidad)</strong>
+                        <p style="margin: 0; font-size: 1.1rem; color: #ccc;">Formalizar el envío de soportes y
+                            certificados exclusivamente vía Correo Electrónico para garantizar trazabilidad, limitando
+                            WhatsApp a coordinación rápida.</p>
+                    </div>
+                </div>
+
+                <div class="action-item">
+                    <div class="action-number">2</div>
+                    <div>
+                        <strong style="font-size: 1.3rem; margin-bottom: 5px; display: block;">Revisión Protocolos
+                            Seguridad</strong>
+                        <p style="margin: 0; font-size: 1.1rem; color: #ccc;">Evaluar la experiencia de usuario en el
+                            ingreso sin comprometer la seguridad, buscando agilizar el proceso para proveedores
+                            recurrentes.</p>
+                    </div>
+                </div>
+
+                <div class="action-item">
+                    <div class="action-number">3</div>
+                    <div>
+                        <strong style="font-size: 1.3rem; margin-bottom: 5px; display: block;">Reportes de Laboratorio
+                            2.0</strong>
+                        <p style="margin: 0; font-size: 1.1rem; color: #ccc;">Continuar con el plan de estandarización
+                            de reportes (iniciado en 2025-I) y realizar una encuesta "flash" específica sobre su
+                            claridad en Marzo 2026.</p>
+                    </div>
+                </div>
+
+                <div class="action-item">
+                    <div class="action-number">4</div>
+                    <div>
+                        <strong style="font-size: 1.3rem; margin-bottom: 5px; display: block;">Gestión de
+                            Regalías</strong>
+                        <p style="margin: 0; font-size: 1.1rem; color: #ccc;">Revisión puntual de cronogramas de pago de
+                            regalías para asegurar alineación total con lo pactado con proveedores específicos.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; text-align: center; border-top: 1px solid #333; padding-top: 30px;">
+                <p style="font-size: 1.2rem;"><strong>Compromiso C.I. Colombian Mint:</strong><br> "Transformar cada
+                    sugerencia en una mejora tangible para fortalecer nuestra alianza comercial."</p>
+            </div>
+
+            <div class="slide-footer-text">
+                C.I. Colombian Mint S.A.S. | Encuesta de Satisfacción 2025 - II Semestre
+            </div>
+        </div>
+
+        <!-- Navigation Overlay -->
+        <div class="nav-controls">
+            <button id="prevBtn" class="btn-nav">Anterior</button>
+            <span id="slideIndicator" style="margin: 0 15px; color: #aaa; font-size: 1.1rem;">1 / 6</span>
+            <button id="nextBtn" class="btn-nav">Siguiente</button>
+        </div>
+
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const indicator = document.getElementById('slideIndicator');
+        let currentSlide = 0;
+
+        // Chart instances
+        let spiderChart = null;
+        let detailsChart = null;
+        let historicalChart = null;
+
+        function initCharts() {
+            Chart.defaults.color = '#e0e0e0';
+            Chart.defaults.font.family = 'Montserrat';
+            Chart.defaults.font.size = 14;
+
+            // Spider Chart (General Overview)
+            if (document.getElementById('spiderChart')) {
+                const ctxSpider = document.getElementById('spiderChart').getContext('2d');
+                spiderChart = new Chart(ctxSpider, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Atención', 'Seguridad', 'Pagos', 'Negociación', 'Laboratorio'],
+                        datasets: [{
+                            label: 'Desempeño 2025-II',
+                            data: [4.82, 4.30, 4.59, 4.50, 4.46],
+                            backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                            borderColor: '#FFD700',
+                            pointBackgroundColor: '#FFD700',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#FFD700'
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                pointLabels: { font: { size: 14, weight: 'bold' }, color: '#FFD700' },
+                                suggestedMin: 3.5,
+                                suggestedMax: 5,
+                                ticks: { display: false } // Hide numbers to clean up
+                            }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // Bar Chart (Details)
+            if (document.getElementById('detailsChart')) {
+                const ctxDetails = document.getElementById('detailsChart').getContext('2d');
+                detailsChart = new Chart(ctxDetails, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Atención', 'Pagos', 'Negociación', 'Laboratorio', 'Seguridad'],
+                        datasets: [{
+                            label: 'Calificación',
+                            data: [4.8, 4.6, 4.5, 4.5, 4.3],
+                            backgroundColor: [
+                                '#4cd137', // Green
+                                '#4cd137',
+                                '#fbc531', // Yellow
+                                '#fbc531',
+                                '#e84118'  // Red/Orange
+                            ],
+                            borderRadius: 8,
+                            barThickness: 'flex',
+                            maxBarThickness: 50
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        scales: {
+                            x: { max: 5, grid: { color: 'rgba(255,255,255,0.05)' } },
+                            y: { grid: { display: false }, ticks: { font: { size: 14 } } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // Line Chart (History)
+            if (document.getElementById('historicalChart')) {
+                const ctxHistory = document.getElementById('historicalChart').getContext('2d');
+                historicalChart = new Chart(ctxHistory, {
+                    type: 'line',
+                    data: {
+                        labels: ['2023-I', '2023-II', '2024-I', '2025-I', '2025-II'],
+                        datasets: [{
+                            label: 'Satisfacción Global',
+                            data: [4.7, 4.7, 4.6, 4.7, 4.6],
+                            borderColor: '#FFD700',
+                            backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 8,
+                            pointHoverRadius: 10
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { min: 4.0, max: 5.0, grid: { color: 'rgba(255,255,255,0.05)' } },
+                            x: { grid: { display: false }, ticks: { font: { size: 14 } } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        }
+
+        function showSlide(index) {
+            slides.forEach(s => s.classList.remove('active'));
+            slides[index].classList.add('active');
+
+            // Navigation State
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === slides.length - 1;
+            indicator.textContent = `${index + 1} / ${slides.length}`;
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentSlide > 0) { currentSlide--; showSlide(currentSlide); }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentSlide < slides.length - 1) { currentSlide++; showSlide(currentSlide); }
+        });
+
+        // Initialize
+        initCharts();
+        showSlide(0);
+
+    </script>
+</body>
+
+</html>
